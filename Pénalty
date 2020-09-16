@@ -1,0 +1,50 @@
+// Variables
+
+int Moteur_sens1_gauche = 4;
+int Moteur_sens2_gauche = 5;
+
+int Moteur_sens1_droite = 6;
+int Moteur_sens2_droite = 7;
+
+int Moteur_allumage_gauche = 8;
+int Moteur_allumage_droite = 9;
+
+  
+void setup() {
+
+
+  // Init interface série 
+  Serial.begin(115200); 
+  
+  pinMode(Moteur_sens1_gauche, OUTPUT);
+  pinMode(Moteur_sens2_gauche, OUTPUT);
+  
+  pinMode(Moteur_sens1_droite, OUTPUT);
+  pinMode(Moteur_sens2_droite, OUTPUT);
+  
+  pinMode(Moteur_allumage_gauche, OUTPUT);
+  pinMode(Moteur_allumage_droite, OUTPUT);
+  
+  digitalWrite(Moteur_allumage_gauche, HIGH); //Allumage du moteur Gauche
+  digitalWrite(Moteur_allumage_droite, HIGH); //Allumage du moteur Droite  
+
+}
+
+void avancer(){                               // Fonction Avancer
+  digitalWrite(Moteur_sens1_gauche, 255);
+  digitalWrite(Moteur_sens2_gauche, 0);
+  
+  digitalWrite(Moteur_sens1_droite, 255);     //Mise en fonctionnement du moteur de le sens1 à la puissance maximum
+  digitalWrite(Moteur_sens2_droite, 0);       //Mise à l'arret du Sens2 du moteur
+}
+
+void arreter(){                               //Fonction Arreter
+  digitalWrite(Moteur_allumage_gauche, LOW);
+  digitalWrite(Moteur_allumage_droite, LOW);
+}
+void loop() {
+
+avancer()  // Utilisation de fonction avancer définie plus haut
+
+delay(500); // Délais de 0.5 seconde
+}

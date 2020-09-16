@@ -1,0 +1,135 @@
+// Variables
+
+int Moteur_sens1_gauche = 5;
+int Moteur_sens2_gauche = 4;
+
+int Moteur_sens1_droite = 7;
+int Moteur_sens2_droite = 6;
+
+int Moteur_allumage_gauche = 8;
+int Moteur_allumage_droite = 9;
+int counter = 0;
+// VARIABLES ULTRASON
+
+// Variables pour HC-SR04
+const int Echo_in_pin = 13; 
+const int Trig_out_pin = 12;
+float Dist_mm=0.0;
+
+// Vitesse du son (mm/us) 
+const double Speed_sound = 340.0e-3;
+
+
+
+void setup() {
+  
+  // Initialisation HC-SR04
+  pinMode(Trig_out_pin, OUTPUT);
+  pinMode(Echo_in_pin, INPUT);
+  digitalWrite(Trig_out_pin, LOW);
+
+  // Init interface série 
+  Serial.begin(115200); 
+  
+  pinMode(Moteur_sens1_gauche, OUTPUT);
+  pinMode(Moteur_sens2_gauche, OUTPUT);
+  
+  pinMode(Moteur_sens1_droite, OUTPUT);
+  pinMode(Moteur_sens2_droite, OUTPUT);
+  
+  pinMode(Moteur_allumage_gauche, OUTPUT);
+  pinMode(Moteur_allumage_droite, OUTPUT);
+  
+  digitalWrite(Moteur_allumage_gauche, HIGH);
+  digitalWrite(Moteur_allumage_droite, HIGH);
+
+}
+
+void loop() {
+  retour:
+  // ULTRASON
+  delay(2000);
+   digitalWrite(Moteur_sens2_droite, 100);
+    digitalWrite(Moteur_sens1_gauche, 100);
+  /* Mesure de la distance */ 
+  Dist_mm=GetDisCM( Echo_in_pin,  Trig_out_pin,  Speed_sound); // Valeur brute 
+  //Dist_mm=GetMean(8,  Echo_in_pin,  Trig_out_pin,  Speed_sound); // Valeur moyenne 
+
+  /* Affichage de la distance */
+
+  // CONDITION
+  
+
+ if((Dist_mm < 150) && (Dist_mm != 0.0)){
+  digitalWrite(Moteur_sens1_droite, 0);
+  digitalWrite(Moteur_sens2_droite, 0);
+  digitalWrite(Moteur_sens1_gauche, 0);
+  digitalWrite(Moteur_sens2_gauche, 0);
+  delay(500);
+  digitalWrite(Moteur_sens1_droite, 127);
+  digitalWrite(Moteur_sens2_droite, 0);
+
+  digitalWrite(Moteur_sens1_gauche, 0);
+  digitalWrite(Moteur_sens2_gauche, 127);
+  delay(600);
+  }else{
+    
+    counter++;
+    if (counter == 2){
+  digitalWrite(Moteur_sens1_droite, 127);
+  digitalWrite(Moteur_sens2_droite, 0);
+
+  digitalWrite(Moteur_sens1_gauche, 127);
+  digitalWrite(Moteur_sens2_gauche, 0);
+delay(1200);
+     counter = 0;
+     goto retour;
+    }
+    
+
+  digitalWrite(Moteur_sens1_gauche, HIGH);
+  digitalWrite(Moteur_sens2_gauche, LOW);
+
+  digitalWrite(Moteur_sens1_droite, LOW);
+  digitalWrite(Moteur_sens2_droite, HIGH); 
+    counter=0; 
+  }
+  
+delay(500);
+
+}
+
+// Calcul de la distance en mm 
+float GetDisCM(int Echo_in_pinn, int Trig_out_pinn, double Speed_soundd)
+{
+  float Dist_milm=0.0;
+  long HC_val=0; 
+  
+  // Déclanchement mesure avec l'envoie d'une impulsion de 10µs
+  digitalWrite(Trig_out_pin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(Trig_out_pin, LOW);
+  
+  // Lecture du temps aller/retour de l'onde 
+  HC_val = pulseIn(Echo_in_pin, HIGH, 30000);
+    
+  // Calcul de distance d(mm), V=d/t==> v*t   
+  // Le coefficnet 2 pour la distance aller
+  Dist_milm = (HC_val/2.0) * Speed_sound; 
+
+  return Dist_milm;
+} 
+
+// Valeur Moyenne 
+float GetMean(long Taille, int Echo_in_pinn, int Trig_out_pinn, double Speed_soundd)
+{
+  long i;
+  float Distance_tmp, Mean_val=0.0,Somme=0.0; 
+  for(i=0; i<Taille; i++)
+  {
+    Distance_tmp=GetDisCM( Echo_in_pinn,  Trig_out_pinn,  Speed_soundd);
+    Somme=Somme+Distance_tmp; 
+  }
+  Mean_val=Somme/Taille; 
+  return Mean_val;
+}
